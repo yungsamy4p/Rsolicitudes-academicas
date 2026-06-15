@@ -1,0 +1,45 @@
+/* Estilos personalizados para el Registro de Solicitudes */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+}
+
+header {
+    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+}
+
+/* Colores personalizados para las prioridades en las tablas */
+.badge-alta {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-media {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-baja {
+    background-color: #198754;
+    color: white;
+}
+
+/* Permitir saltos de línea controlados en la descripción de la tabla mediante tooltips o colapsables */
+.text-wrap-desc {
+    white-space: normal;
+    max-width: 250px;
+    font-size: 0.875rem;
+}
+
+/* Transición suave al eliminar o añadir elementos */
+tr {
+    transition: all 0.3s ease;
+}
+
+/* Estilo para la cabecera fija de la tabla */
+.sticky-top {
+    top: 0;
+    z-index: 10;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.12);
+}

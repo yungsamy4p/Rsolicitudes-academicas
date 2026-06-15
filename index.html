@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Solicitudes Académicas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-light">
+
+    <header class="bg-dark text-white text-center py-4 mb-4 shadow">
+        <h1>Registro de Solicitudes Académicas</h1>
+        <p class="lead mb-0">Gestión integrada de requerimientos estudiantiles</p>
+    </header>
+
+    <main class="container mb-5">
+        <div class="row g-4">
+            
+            <section class="col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="card-title mb-0">Nueva Solicitud</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="liveAlertPlaceholder"></div>
+
+                        <form id="solicitudForm" novalidate>
+                            <div class="mb-3">
+                                <label for="nombreEstudiante" class="form-label">Nombre del Estudiante *</label>
+                                <input type="text" class="form-control" id="nombreEstudiante" placeholder="Ej. Juan Pérez">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="correoInstitucional" class="form-label">Correo Institucional *</label>
+                                <input type="email" class="form-control" id="correoInstitucional" placeholder="nombre@institucion.cl">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="asignatura" class="form-label">Asignatura *</label>
+                                <input type="text" class="form-control" id="asignatura" placeholder="Ej. Programación Web">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tipoSolicitud" class="form-label">Tipo de Solicitud *</label>
+                                    <select class="form-select" id="tipoSolicitud">
+                                        <option value="" selected disabled>Seleccione...</option>
+                                        <option value="Evaluación">Evaluación</option>
+                                        <option value="Asistencia">Asistencia</option>
+                                        <option value="Contenidos">Contenidos</option>
+                                        <option value="Plataforma">Plataforma</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="prioridad" class="form-label">Prioridad *</label>
+                                    <select class="form-select" id="prioridad">
+                                        <option value="" selected disabled>Seleccione...</option>
+                                        <option value="Baja">Baja</option>
+                                        <option value="Media">Media</option>
+                                        <option value="Alta">Alta</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="fechaIngreso" class="form-label">Fecha de Ingreso *</label>
+                                <input type="date" class="form-control" id="fechaIngreso">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción de la Solicitud *</label>
+                                <textarea class="form-control" id="descripcion" rows="3" placeholder="Detalle su requerimiento aquí (mínimo 15 caracteres)..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2" id="btnRegistrar">
+                                Registrar Solicitud
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section class="col-lg-7">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body bg-white border-start border-primary border-4 rounded-end">
+                        <div class="row align-items-center">
+                            <div class="col-md-4 mb-2 mb-md-0">
+                                <h6 class="mb-0 text-secondary fw-bold">Filtrar Solicitudes:</h6>
+                            </div>
+                            <div class="col-md-8">
+                                <select class="form-select" id="filtroPrioridad">
+                                    <option value="TODAS">Mostrar Todas las Prioridades</option>
+                                    <option value="Alta">Prioridad: Alta</option>
+                                    <option value="Media">Prioridad: Media</option>
+                                    <option value="Baja">Prioridad: Baja</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 d-inline-block">Listado de Requerimientos</h5>
+                        <span class="badge bg-secondary" id="contadorSolicitudes">0 registros</span>
+                    </div>
+                    <div class="table-responsive" style="max-height: 530px;">
+                        <table class="table table-hover align-middle mb-0 text-nowrap">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th scope="col">Estudiante</th>
+                                    <th scope="col">Asignatura / Tipo</th>
+                                    <th scope="col">Prioridad</th>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col" class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaSolicitudesBody">
+                                <tr id="filaVacia">
+                                    <td colspan="5" class="text-center py-4 text-muted italic">
+                                        No se han registrado solicitudes académicas aún.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
