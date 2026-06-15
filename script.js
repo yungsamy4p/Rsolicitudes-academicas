@@ -1,31 +1,114 @@
-// Arreglo global para almacenar los objetos de solicitudes (Base de datos en memoria)
-let solicitudes = [];
+/**
+ * EVALUACIÓN INTEGRADA UMM - PROGRAMACIÓN WEB
+ * Sistema de Registro de Solicitudes Académicas con Panel de Retroalimentación
+ */
 
-// Definición de la extensión mínima exigida para la descripción (Criterio de prueba)
+// --- Base de Datos en Memoria ---
+let solicitudes = [
+    { 
+        id: 1, 
+        nombre: "Juan Pérez", 
+        correo: "juan.perez@umm.cl", 
+        asignatura: "Programación Web", 
+        tipo: "Evaluación", 
+        prioridad: "Alta", 
+        fecha: "2026-06-15", 
+        descripcion: "Problemas con el despliegue del examen en el servidor local.",
+        respuesta: "Estimado, se ha habilitado un servidor de contingencia para que rinda su evaluación hoy hasta las 20:00 hrs.",
+        estado: "Resuelta"
+    },
+    { 
+        id: 2, 
+        nombre: "María López", 
+        correo: "maria.lopez@umm.cl", 
+        asignatura: "Bases de Datos", 
+        tipo: "Asistencia", 
+        prioridad: "Media", 
+        fecha: "2026-06-14", 
+        descripcion: "Justificativo médico cargado por inasistencia al laboratorio del jueves.",
+        respuesta: "",
+        estado: "Pendiente"
+    }
+];
+
 const MIN_LONGITUD_DESCRIPCION = 15; 
+let usuarioLogueado = { username: "", rol: "" };
+let idSolicitudSeleccionada = null; // Variable de control para el Modal
 
-// --- Captura de Elementos del DOM ---
-const formulario = document.getElementById('solicitudForm');
-const tablaBody = document.getElementById('tablaSolicitudesBody');
-const filtroPrioridad = document.getElementById('filtroPrioridad');
-const contadorSolicitudes = document.getElementById('contadorSolicitudes');
-const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
-
-// --- Manejo de Eventos ---
-document.addEventListener('DOMContentLoaded', () => {
-    // Escuchar el envío del formulario
-    formulario.addEventListener('submit', procesarFormulario);
-    // Escuchar cambios en el selector del filtro
-    filtroPrioridad.addEventListener('change', filtrarResultados);
-    // Establecer la fecha actual de forma automática por comodidad de UX
-    document.getElementById('fechaIngreso').valueAsDate = new Date();
-});
-
-// --- Función Principal al Enviar Formulario ---
-function procesarFormulario(e) {
-    e.preventDefault(); // Evita la recarga nativa de la página
+// --- Función de Login ---
+window.manejarLogin = function(e) {
+    if (e) e.preventDefault();
     
-    // Capturar datos del formulario
+    const userField = document.getElementById('loginUser');
+    const passField = document.getElementById('loginPassword');
+    const rolField = document.getElementById('loginRol');
+
+    const user = userField.value.trim();
+    const pass = passField.value;
+    const rol = rolField.value;
+
+    if (!user || !pass || !rol) {
+        mostrarMensajeLogin('Todos los campos de acceso son obligatorios.', 'danger');
+        return;
+    }
+
+    usuarioLogueado.username = user;
+    usuarioLogueado.rol = rol;
+
+    const loginContainer = document.getElementById('loginContainer');
+    const dashboardContainer = document.getElementById('dashboardContainer');
+
+    if (loginContainer && dashboardContainer) {
+        loginContainer.classList.add('d-none');
+        dashboardContainer.classList.remove('d-none');
+    }
+
+    configurarEntornoPorRol();
+};
+
+function configurarEntornoPorRol() {
+    const txtSesionRol = document.getElementById('txtSesionRol');
+    const txtSesionUsuario = document.getElementById('txtSesionUsuario');
+    const columnaFormulario = document.getElementById('columnaFormulario');
+    const columnaTabla = document.getElementById('columnaTabla');
+    const txtTablaHeader = document.getElementById('txtTablaHeader');
+
+    if (txtSesionRol) txtSesionRol.textContent = usuarioLogueado.rol;
+    if (txtSesionUsuario) txtSesionUsuario.textContent = usuarioLogueado.username;
+
+    if (usuarioLogueado.rol === 'profesor') {
+        if (columnaFormulario) columnaFormulario.classList.add('d-none');
+        if (columnaTabla) columnaTabla.className = "col-lg-12"; 
+        if (txtTablaHeader) txtTablaHeader.textContent = "Consola de Solicitudes Recibidas (Docente)";
+    } else {
+        if (columnaFormulario) columnaFormulario.classList.remove('d-none');
+        if (columnaTabla) columnaTabla.className = "col-lg-8"; 
+        if (txtTablaHeader) txtTablaHeader.textContent = "Mis Solicitudes Ingresadas";
+        
+        const correoInst = document.getElementById('correoInstitucional');
+        if (correoInst && usuarioLogueado.username.includes('@')) {
+            correoInst.value = usuarioLogueado.username;
+        }
+    }
+
+    filtrarResultados();
+}
+
+window.manejarLogout = function() {
+    usuarioLogueado = { username: "", rol: "" };
+    const loginContainer = document.getElementById('loginContainer');
+    const dashboardContainer = document.getElementById('dashboardContainer');
+    
+    if (loginContainer && dashboardContainer) {
+        dashboardContainer.classList.add('d-none');
+        loginContainer.classList.remove('d-none');
+    }
+};
+
+// --- Procesar Formulario de Registro (Estudiante) ---
+function procesarFormulario(e) {
+    if (e) e.preventDefault();
+    
     const nombre = document.getElementById('nombreEstudiante').value.trim();
     const correo = document.getElementById('correoInstitucional').value.trim();
     const asignatura = document.getElementById('asignatura').value.trim();
@@ -34,153 +117,223 @@ function procesarFormulario(e) {
     const fecha = document.getElementById('fechaIngreso').value;
     const descripcion = document.getElementById('descripcion').value.trim();
 
-    // --- Validaciones de Campos Mandatorios ---
     if (!nombre || !correo || !asignatura || !tipo || !prioridad || !fecha || !descripcion) {
-        mostrarMensaje('Todos los campos marcados con asterisco (*) son obligatorios.', 'danger');
+        mostrarMensaje('Error: Todos los campos del formulario son obligatorios.', 'danger');
         return;
     }
 
-    // Validación de Formato de Correo (RegEx estándar)
     const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!correoRegex.test(correo)) {
-        mostrarMensaje('El correo institucional ingresado no tiene un formato válido.', 'danger');
+        mostrarMensaje('Error: Formato de correo inválido.', 'danger');
         return;
     }
 
-    // Validación de Extensión Mínima de la Descripción
     if (descripcion.length < MIN_LONGITUD_DESCRIPCION) {
-        mostrarMensaje(`La descripción debe ser detallada (mínimo ${MIN_LONGITUD_DESCRIPCION} caracteres).`, 'danger');
+        mostrarMensaje(`Error: La descripción debe tener al menos ${MIN_LONGITUD_DESCRIPCION} caracteres.`, 'danger');
         return;
     }
 
-    // --- Creación del Objeto de Solicitud ---
-    const nuevaSolicitud = {
-        id: Date.now(), // ID único basado en timestamp para la eliminación segura
-        nombre,
-        correo,
-        asignatura,
-        tipo,
-        prioridad,
-        fecha,
-        descripcion
-    };
+    // Insertar con estado por defecto "Pendiente" y respuesta vacía
+    solicitudes.push({ 
+        id: Date.now(), 
+        nombre, 
+        correo, 
+        asignatura, 
+        tipo, 
+        prioridad, 
+        fecha, 
+        descripcion,
+        respuesta: "",
+        estado: "Pendiente"
+    });
 
-    // Almacenar en el arreglo global
-    solicitudes.push(nuevaSolicitud);
-
-    // Actualizar Interfaz Gráfica
-    renderizarTabla(solicitudes);
-    mostrarMensaje('¡Solicitud académica registrada de manera exitosa!', 'success');
+    filtrarResultados(); 
+    mostrarMensaje('¡Solicitud registrada correctamente en la plataforma!', 'success');
     
-    // Limpiar el formulario de forma segura
-    formulario.reset();
-    document.getElementById('fechaIngreso').valueAsDate = new Date(); // Reajustar fecha por defecto
+    const formulario = document.getElementById('solicitudForm');
+    if (formulario) {
+        formulario.reset();
+        document.getElementById('fechaIngreso').valueAsDate = new Date();
+    }
 }
 
-// --- Función de Renderizado Dinámico de la Tabla ---
+// --- Renderizar Tabla Dinámica ---
 function renderizarTabla(listaSolicitudes) {
-    // Limpiar filas anteriores por completo
+    const tablaBody = document.getElementById('tablaSolicitudesBody');
+    const contadorSolicitudes = document.getElementById('contadorSolicitudes');
+    if (!tablaBody) return;
+
     tablaBody.innerHTML = '';
 
-    if (listaSolicitudes.length === 0) {
-        tablaBody.innerHTML = `
-            <tr id="filaVacia">
-                <td colspan="5" class="text-center py-4 text-muted style="font-style: italic;">
-                    No se encontraron registros coincidentes.
-                </td>
-            </tr>
-        `;
-        actualizarContador(0);
+    let filtradas = [...listaSolicitudes];
+    if (usuarioLogueado.rol === 'estudiante') {
+        filtradas = listaSolicitudes.filter(sol => 
+            sol.correo.toLowerCase() === usuarioLogueado.username.toLowerCase() ||
+            sol.nombre.toLowerCase().includes(usuarioLogueado.username.toLowerCase())
+        );
+    }
+
+    if (filtradas.length === 0) {
+        tablaBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted" style="font-style: italic;">No hay registros para mostrar.</td></tr>`;
+        if (contadorSolicitudes) contadorSolicitudes.textContent = "0 registros";
         return;
     }
 
-    // Generar filas dinámicamente
-    listaSolicitudes.forEach(solicitud => {
+    filtradas.forEach(sol => {
         const tr = document.createElement('tr');
         
-        // Determinar estilo de la etiqueta según prioridad
-        let badgeClass = 'badge-baja';
-        if (solicitud.prioridad === 'Alta') badgeClass = 'badge-alta';
-        if (solicitud.prioridad === 'Media') badgeClass = 'badge-media';
+        // Estilos de prioridades
+        let badgeClass = sol.prioridad === 'Alta' ? 'badge-alta' : (sol.prioridad === 'Media' ? 'badge-media' : 'badge-baja');
+        
+        // Renderizado del cuerpo del mensaje o la respuesta oficial
+        let celdaDescripcion = `
+            <div class="text-truncate" style="max-width: 220px;" title="${escapeHTML(sol.descripcion)}">
+                ${escapeHTML(sol.descripcion)}
+            </div>
+        `;
+        if (sol.estado === 'Resuelta') {
+            celdaDescripcion += `
+                <div class="mt-1 small p-1 bg-success-subtle text-success rounded border border-success-subtle" style="font-size: 0.8rem;">
+                    <strong>Resp:</strong> ${escapeHTML(sol.respuesta)}
+                </div>
+            `;
+        }
+
+        // Configuración de botones de Acción por Rol
+        let botonesAccion = '';
+        if (usuarioLogueado.rol === 'profesor') {
+            if (sol.estado === 'Pendiente') {
+                botonesAccion = `<button class="btn btn-primary btn-sm me-1" onclick="abrirModalRespuesta(${sol.id})">Responder</button>`;
+            } else {
+                botonesAccion = `<button class="btn btn-outline-secondary btn-sm me-1" onclick="abrirModalRespuesta(${sol.id})">Ver Ficha</button>`;
+            }
+            botonesAccion += `<button class="btn btn-outline-danger btn-sm" onclick="eliminarSolicitud(${sol.id})">Eliminar</button>`;
+        } else {
+            // El estudiante solo elimina si está pendiente; si ya está resuelta no puede borrarla para mantener constancia
+            botonesAccion = `<button class="btn btn-outline-danger btn-sm" onclick="eliminarSolicitud(${sol.id})" ${sol.estado === 'Resuelta' ? 'disabled' : ''}>Eliminar</button>`;
+        }
 
         tr.innerHTML = `
-            <td>
-                <div class="fw-bold">${escapeHTML(solicitud.nombre)}</div>
-                <small class="text-muted d-block" style="font-size: 0.75rem;">${escapeHTML(solicitud.correo)}</small>
-            </td>
-            <td>
-                <div>${escapeHTML(solicitud.asignatura)}</div>
-                <span class="badge bg-light text-dark border">${escapeHTML(solicitud.tipo)}</span>
-            </td>
-            <td>
-                <span class="badge ${badgeClass}">${solicitud.prioridad}</span>
-            </td>
-            <td>
-                <small class="text-secondary">${solicitud.fecha}</small>
-            </td>
-            <td class="text-center">
-                <button class="btn btn-outline-danger btn-sm px-2 py-1" onclick="eliminarSolicitud(${solicitud.id})">
-                    Eliminar
-                </button>
-            </td>
+            <td><div class="fw-bold">${escapeHTML(sol.nombre)}</div><small class="text-muted d-block">${escapeHTML(sol.correo)}</small></td>
+            <td><div>${escapeHTML(sol.asignatura)}</div><span class="badge bg-light text-dark border" style="font-size:0.75rem;">${escapeHTML(sol.tipo)}</span></td>
+            <td>${celdaDescripcion}</td>
+            <td><span class="badge ${badgeClass}">${sol.prioridad}</span></td>
+            <td><small class="text-secondary">${sol.fecha}</small></td>
+            <td class="text-center"><div class="d-flex justify-content-center">${botonesAccion}</div></td>
         `;
-        
-        // Agregar fila al contenedor del DOM
         tablaBody.appendChild(tr);
     });
 
-    actualizarContador(listaSolicitudes.length);
+    if (contadorSolicitudes) contadorSolicitudes.textContent = `${filtradas.length} registros`;
 }
 
-// --- Función para Eliminar Solicitudes ---
-window.eliminarSolicitud = function(id) {
-    // Filtrar el arreglo excluyendo el ID seleccionado
-    solicitudes = solicitudes.filter(sol => sol.id !== id);
-    
-    // Aplicar el filtro de vista actual si estuviera activo al redibujar
-    filtrarResultados();
-    mostrarMensaje('La solicitud ha sido eliminada del sistema.', 'warning');
+// --- Controlador del Modal de Respuesta ---
+window.abrirModalRespuesta = function(id) {
+    idSolicitudSeleccionada = id;
+    const sol = solicitudes.find(s => s.id === id);
+    if (!sol) return;
+
+    // Cargar datos estáticos en la ficha del Modal
+    document.getElementById('modalNombre').textContent = sol.nombre;
+    document.getElementById('modalCorreo').textContent = sol.correo;
+    document.getElementById('modalAsignatura').textContent = sol.asignatura;
+    document.getElementById('modalTipo').textContent = sol.tipo;
+    document.getElementById('modalDescripcion').textContent = sol.descripcion;
+
+    const badgePrioridad = document.getElementById('modalPrioridad');
+    badgePrioridad.textContent = sol.prioridad;
+    badgePrioridad.className = "badge " + (sol.prioridad === 'Alta' ? 'badge-alta' : (sol.prioridad === 'Media' ? 'badge-media' : 'badge-baja'));
+
+    const inputRespuesta = document.getElementById('txtRespuestaProfesor');
+    const contenedorForm = document.getElementById('contenedorFormRespuesta');
+    const btnGuardar = document.getElementById('btnGuardarRespuesta');
+
+    // Adaptar Modal si la solicitud ya fue respondida con anterioridad
+    if (sol.estado === 'Resuelta') {
+        inputRespuesta.value = sol.respuesta;
+        inputRespuesta.disabled = true;
+        btnGuardar.classList.add('d-none');
+    } else {
+        inputRespuesta.value = '';
+        inputRespuesta.disabled = false;
+        btnGuardar.classList.remove('d-none');
+    }
+
+    // Inicializar y mostrar el Modal de Bootstrap de forma programática
+    const modalElement = document.getElementById('respuestaModal');
+    const modalInstancia = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modalInstancia.show();
 };
 
-// --- Función para Filtrar Datos ---
+// --- Guardar Respuesta del Profesor ---
+document.getElementById('btnGuardarRespuesta').addEventListener('click', () => {
+    const textoRespuesta = document.getElementById('txtRespuestaProfesor').value.trim();
+
+    if (!textoRespuesta) {
+        alert("Por favor, redacte una respuesta válida para el estudiante.");
+        return;
+    }
+
+    // Modificar la solicitud directamente en la base de datos en memoria
+    const sol = solicitudes.find(s => s.id === idSolicitudSeleccionada);
+    if (sol) {
+        sol.respuesta = textoRespuesta;
+        sol.estado = "Resuelta";
+    }
+
+    // Cerrar el modal de manera limpia
+    const modalElement = document.getElementById('respuestaModal');
+    const modalInstancia = bootstrap.Modal.getInstance(modalElement);
+    if (modalInstancia) modalInstancia.hide();
+
+    // Actualizar interfaz
+    filtrarResultados();
+    mostrarMensaje('¡La respuesta académica ha sido despachada con éxito!', 'success');
+});
+
+window.eliminarSolicitud = function(id) {
+    if (confirm("¿Está seguro de que desea eliminar permanentemente este requerimiento del sistema?")) {
+        solicitudes = solicitudes.filter(sol => sol.id !== id);
+        filtrarResultados();
+    }
+};
+
 function filtrarResultados() {
-    const criterio = filtroPrioridad.value;
+    const filtro = document.getElementById('filtroPrioridad');
+    const criterio = filtro ? filtro.value : 'TODAS';
     
     if (criterio === 'TODAS') {
         renderizarTabla(solicitudes);
     } else {
-        const solicitudesFiltradas = solicitudes.filter(sol => sol.prioridad === criterio);
-        renderizarTabla(solicitudesFiltradas);
+        renderizarTabla(solicitudes.filter(sol => sol.prioridad === criterio));
     }
 }
 
-// --- Componente de Alertas / Mensajes Dinámicos ---
+// --- Mensajes de Feedback ---
 function mostrarMensaje(mensaje, tipo) {
-    alertPlaceholder.innerHTML = `
-        <div class="alert alert-${tipo} alert-dismissible fade show shadow-sm" role="alert">
-            <div>${mensaje}</div>
-            <button type="submit" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
-
-    // Cierre automático pasados los 5 segundos para mejorar el flujo de uso
-    setTimeout(() => {
-        const alertNode = alertPlaceholder.querySelector('.alert');
-        if (alertNode) {
-            const bsAlert = bootstrap.Alert.getInstance(alertNode) || new bootstrap.Alert(alertNode);
-            bsAlert.close();
-        }
-    }, 5000);
+    const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+    if (!alertPlaceholder) return;
+    alertPlaceholder.innerHTML = `<div class="alert alert-${tipo} alert-dismissible fade show shadow-sm" role="alert"><div>${mensaje}</div><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
 }
 
-// --- Helpers de Soporte de Interfaz ---
-function actualizarContador(cantidad) {
-    contadorSolicitudes.textContent = `${cantidad} ${cantidad === 1 ? 'registro' : 'registros'}`;
+function mostrarMensajeLogin(mensaje, tipo) {
+    const loginAlertPlaceholder = document.getElementById('loginAlertPlaceholder');
+    if (!loginAlertPlaceholder) return;
+    loginAlertPlaceholder.innerHTML = `<div class="alert alert-${tipo} py-2 small shadow-sm" role="alert">${mensaje}</div>`;
 }
 
-// Prevenir inyección de código (XSS) al reflejar strings dinámicos en la UI
 function escapeHTML(str) {
-    return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-    );
+    return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
+
+// --- Inicializadores ---
+document.addEventListener('DOMContentLoaded', () => {
+    const formSolicitud = document.getElementById('solicitudForm');
+    if (formSolicitud) formSolicitud.addEventListener('submit', procesarFormulario);
+
+    const filtro = document.getElementById('filtroPrioridad');
+    if (filtro) filtro.addEventListener('change', filtrarResultados);
+
+    const inputFecha = document.getElementById('fechaIngreso');
+    if (inputFecha) inputFecha.valueAsDate = new Date();
+});
