@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Solicitudes Académicas</title>
+
+    <link rel="icon" type="image/x-icon" href="img/system.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="bg-light">
 
     <div id="loginContainer" class="d-flex align-items-center justify-content-center min-vh-100 p-3">
         <div class="card shadow border-0 p-4" style="max-width: 420px; width: 100%;">
             <div class="text-center mb-4">
-                <div class="bg-primary text-white rounded-circle d-inline-flex p-3 mb-2 shadow-sm">
-                    <span style="font-size: 2rem; font-weight: bold; line-height: 1;">U</span>
-                </div>
+                <img src="img/santo-tomas-logo.png" alt="Logo UMM" class="img-fluid mb-3 shadow-sm rounded"
+                    style="max-height: 80px; object-fit: contain;">
                 <h4 class="fw-bold mb-1">Portal Académico</h4>
                 <p class="text-muted small">Por favor, inicie sesión para continuar</p>
             </div>
@@ -25,6 +29,10 @@
                 <div class="mb-3">
                     <label for="loginUser" class="form-label">Correo o Usuario</label>
                     <input type="text" class="form-control" id="loginUser" placeholder="ejemplo@umm.cl">
+                    <div class="form-text text-muted" style="font-size: 0.75rem;">
+                        Pruebas: <strong>juan.perez@umm.cl</strong>, <strong>maria.lopez@umm.cl</strong> o
+                        <strong>profesor</strong>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="loginPassword" class="form-label">Contraseña</label>
@@ -38,7 +46,8 @@
                         <option value="profesor">Profesor / Académico</option>
                     </select>
                 </div>
-                <button type="button" class="btn btn-primary w-100 py-2 fw-semibold" onclick="manejarLogin(event)">Ingresar al Sistema</button>
+                <button type="button" class="btn btn-primary w-100 py-2 fw-semibold"
+                    onclick="manejarLogin(event)">Ingresar al Sistema</button>
             </form>
         </div>
     </div>
@@ -48,15 +57,19 @@
             <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
                 <div class="text-sm-start w-100">
                     <h1 class="h3 mb-1">Registro de Solicitudes Académicas</h1>
-                    <p class="lead small mb-0 opacity-75">Sesión: <span id="txtSesionRol" class="badge bg-primary text-capitalize">Rol</span> (<span id="txtSesionUsuario">Usuario</span>)</p>
+                    <p class="lead small mb-0 opacity-75">Sesión: <span id="txtSesionRol"
+                            class="badge bg-primary text-capitalize">Rol</span> (<span
+                            id="txtSesionUsuario">Usuario</span>)</p>
                 </div>
-                <button type="button" class="btn btn-outline-danger btn-sm px-3 py-1.5 fw-semibold shadow-sm bg-dark text-white border-danger header-logout-btn" onclick="manejarLogout()">Cerrar Sesión</button>
+                <button type="button"
+                    class="btn btn-outline-danger btn-sm px-3 py-1.5 fw-semibold shadow-sm bg-dark text-white border-danger header-logout-btn"
+                    onclick="manejarLogout()">Cerrar Sesión</button>
             </div>
         </header>
 
         <main class="container mb-5">
             <div class="row g-4">
-                
+
                 <section class="col-lg-4" id="columnaFormulario">
                     <div class="card shadow-sm">
                         <div class="card-header bg-primary text-white py-3">
@@ -67,7 +80,8 @@
                             <form id="solicitudForm" novalidate>
                                 <div class="mb-3">
                                     <label for="nombreEstudiante" class="form-label">Nombre Completo *</label>
-                                    <input type="text" class="form-control" id="nombreEstudiante">
+                                    <input type="text" class="form-control" id="nombreEstudiante"
+                                        placeholder="Ej. Juan Pérez">
                                 </div>
                                 <div class="mb-3">
                                     <label for="correoInstitucional" class="form-label">Correo Institucional *</label>
@@ -75,7 +89,8 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="asignatura" class="form-label">Asignatura *</label>
-                                    <input type="text" class="form-control" id="asignatura">
+                                    <input type="text" class="form-control" id="asignatura"
+                                        placeholder="Ej. Programación Web">
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -100,12 +115,13 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="fechaIngreso" class="form-label">Fecha *</label>
+                                    <label for="fechaIngreso" class="form-label">Fecha de Ingreso *</label>
                                     <input type="date" class="form-control" id="fechaIngreso">
                                 </div>
                                 <div class="mb-3">
                                     <label for="descripcion" class="form-label">Descripción Requerimiento *</label>
-                                    <textarea class="form-control" id="descripcion" rows="3" placeholder="Mínimo 15 caracteres..."></textarea>
+                                    <textarea class="form-control" id="descripcion" rows="3"
+                                        placeholder="Mínimo 15 caracteres..."></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100 py-2">Registrar Solicitud</button>
                             </form>
@@ -117,7 +133,7 @@
                     <div class="card mb-4 shadow-sm">
                         <div class="card-body bg-white border-start border-primary border-4 rounded-end">
                             <div class="row align-items-center">
-                                <div class="col-md-4 mb-2">
+                                <div class="col-md-4 mb-2 mb-md-0">
                                     <h6 class="mb-0 text-secondary fw-bold">Filtrar Solicitudes:</h6>
                                 </div>
                                 <div class="col-md-8">
@@ -133,7 +149,8 @@
                     </div>
 
                     <div class="card shadow-sm">
-                        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                        <div
+                            class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0" id="txtTablaHeader">Listado de Requerimientos</h5>
                             <span class="badge bg-secondary" id="contadorSolicitudes">0 registros</span>
                         </div>
@@ -149,7 +166,8 @@
                                         <th scope="col" class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tablaSolicitudesBody"></tbody>
+                                <tbody id="tablaSolicitudesBody">
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -159,12 +177,14 @@
         </main>
     </div>
 
-    <div class="modal fade" id="respuestaModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="respuestaModalLabel" aria-hidden="true">
+    <div class="modal fade" id="respuestaModal" data-bs-backdrop="static" tabindex="-1"
+        aria-labelledby="respuestaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title" id="respuestaModalLabel">Revisión de Solicitud Académica</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3 mb-4 bg-light p-3 rounded border">
@@ -174,23 +194,28 @@
                         </div>
                         <div class="col-md-6">
                             <strong>Asignatura:</strong> <span id="modalAsignatura"></span><br>
-                            <strong>Tipo / Prioridad:</strong> <span id="modalTipo"></span> / <span id="modalPrioridad" class="badge"></span>
+                            <strong>Tipo / Prioridad:</strong> <span id="modalTipo"></span> / <span id="modalPrioridad"
+                                class="badge"></span>
                         </div>
                     </div>
-                    
+
                     <div class="mb-4">
                         <label class="form-label fw-bold text-secondary">Descripción del Requerimiento:</label>
-                        <div class="p-3 bg-white border rounded shadow-inner" id="modalDescripcion" style="white-space: pre-wrap;"></div>
+                        <div class="p-3 bg-white border rounded" id="modalDescripcion" style="white-space: pre-wrap;">
+                        </div>
                     </div>
 
                     <div class="mb-3" id="contenedorFormRespuesta">
-                        <label for="txtRespuestaProfesor" class="form-label fw-bold text-primary">Respuesta u Orientación Académica *</label>
-                        <textarea class="form-control" id="txtRespuestaProfesor" rows="4" placeholder="Escriba aquí la solución o respuesta oficial para el estudiante..."></textarea>
+                        <label for="txtRespuestaProfesor" id="lblRespuesta"
+                            class="form-label fw-bold text-primary">Respuesta u Orientación Académica *</label>
+                        <textarea class="form-control" id="txtRespuestaProfesor" rows="4"
+                            placeholder="Escriba aquí la solución o respuesta oficial para el estudiante..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-success" id="btnGuardarRespuesta">Enviar Respuesta Oficial</button>
+                    <button type="button" class="btn btn-success" id="btnGuardarRespuesta">Enviar Respuesta
+                        Oficial</button>
                 </div>
             </div>
         </div>
@@ -199,4 +224,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
