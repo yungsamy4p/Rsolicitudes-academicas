@@ -1,9 +1,3 @@
-/**
- * EVALUACIÓN INTEGRADA UMM - PROGRAMACIÓN WEB
- * Sistema de Registro de Solicitudes Académicas con Panel de Retroalimentación
- */
-
-// --- Base de Datos Semilla en Memoria ---
 let solicitudes = [
     { 
         id: 1, 
@@ -31,7 +25,7 @@ let solicitudes = [
     }
 ];
 
-const MIN_LONGITUD_DESCRIPCION = 15; // Criterio de pruebas del PDF
+const MIN_LONGITUD_DESCRIPCION = 15; 
 let usuarioLogueado = { username: "", rol: "" };
 let idSolicitudSeleccionada = null; 
 
@@ -129,26 +123,24 @@ function procesarFormulario(e) {
     const fecha = document.getElementById('fechaIngreso').value;
     const descripcion = document.getElementById('descripcion').value.trim();
 
-    // CORRECCIÓN DE PERSISTENCIA: Extraer el correo directamente de la sesión activa
     let correo = usuarioLogueado.username;
     if (!correo.includes('@')) {
         correo = usuarioLogueado.username + "@umm.cl";
     }
 
-    // Criterio 1: Validar campos obligatorios vacíos
+
     if (!nombre || !correo || !asignatura || !tipo || !prioridad || !fecha || !descripcion) {
         mostrarMensaje('Error: Todos los campos marcados con asterisco (*) son requeridos.', 'danger');
         return;
     }
 
-    // Criterio 2: Formato de correo institucional válido
+
     const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!correoRegex.test(correo)) {
         mostrarMensaje('Error: El formato de correo de la sesión no es válido.', 'danger');
         return;
     }
 
-    // Criterio 3: Extensión mínima del cuerpo del texto
     if (descripcion.length < MIN_LONGITUD_DESCRIPCION) {
         mostrarMensaje(`Error: La descripción debe detallar el problema (mínimo ${MIN_LONGITUD_DESCRIPCION} caracteres).`, 'danger');
         return;
@@ -317,7 +309,7 @@ window.abrirModalRespuesta = function(id) {
     modalInstancia.show();
 };
 
-// Vinculación segura del botón de despacho de respuestas del Modal
+
 const btnGuardar = document.getElementById('btnGuardarRespuesta');
 if (btnGuardar) {
     btnGuardar.addEventListener('click', () => {
